@@ -49,7 +49,8 @@ const PodcastExplainer = React.memo(function PodcastExplainer({ topic, defaultLa
     Object.fromEntries(CHARACTERS.map(c => [c.id, new Animated.Value(1)]))
   ).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
-  const buttonFadeAnim = useRef(new Animated.Value(0)).current;
+  const initialCanStart = (defaultCharIds?.length ?? 0) >= 2 && defaultLang != null;
+  const buttonFadeAnim = useRef(new Animated.Value(initialCanStart ? 1 : 0)).current;
 
   const canStart = selectedChars.length === 2 && selectedLang !== null;
   const char1 = CHARACTERS.find(c => c.id === selectedChars[0]) ?? null;
