@@ -81,7 +81,8 @@ const PodcastExplainer = React.memo(function PodcastExplainer({ topic, defaultLa
     setCurrentExchange(0);
     setSelectedChars(defaultCharIds ?? []);
     setSelectedLang(defaultLang ?? null);
-    buttonFadeAnim.setValue(0);
+    const willCanStart = (defaultCharIds?.length ?? 0) >= 2 && defaultLang != null;
+    buttonFadeAnim.setValue(willCanStart ? 1 : 0);
     slideAnim.setValue(0);
   };
 
