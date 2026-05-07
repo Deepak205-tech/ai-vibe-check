@@ -174,7 +174,7 @@ export default function TopicModal({ topic, visible, onClose, defaultLang, defau
                   key={topic.id}
                   topic={topic}
                   defaultLang={defaultLang}
-                  defaultCharIds={defaultRegion ? getDefaultCharIds(defaultRegion) : undefined}
+                  defaultCharIds={defaultRegion ? getDefaultCharIds(defaultRegion).slice(0, 2) : undefined}
                 />
               )}
             </View>
