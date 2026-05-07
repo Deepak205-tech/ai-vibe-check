@@ -19,6 +19,7 @@ import {
   SCRIPT_TEMPLATE,
   resolveLine,
 } from '../data/podcastData';
+import SharePopup from './SharePopup';
 
 const { width: SCREEN_W } = Dimensions.get('window');
 const USE_NATIVE = Platform.OS !== 'web';
@@ -44,6 +45,7 @@ const PodcastExplainer = React.memo(function PodcastExplainer({ topic, defaultLa
   const [selectedLang, setSelectedLang] = useState<Language | null>(defaultLang ?? null);
   const [conversationStarted, setConversationStarted] = useState(false);
   const [currentExchange, setCurrentExchange] = useState(0);
+  const [showSharePopup, setShowSharePopup] = useState(false);
 
   const charScaleAnims = useRef<Record<string, Animated.Value>>(
     Object.fromEntries(CHARACTERS.map(c => [c.id, new Animated.Value(1)]))
@@ -267,15 +269,32 @@ const PodcastExplainer = React.memo(function PodcastExplainer({ topic, defaultLa
               ))}
             </View>
 
-            <TouchableOpacity
-              style={[styles.navBtn, currentExchange === 3 && styles.navBtnDisabled]}
-              onPress={handleNext}
-              disabled={currentExchange === 3}
-            >
-              <Text style={styles.navBtnText}>Next ▶</Text>
-            </TouchableOpacity>
+            {currentExchange === 3 ? (
+              <TouchableOpacity
+                style={[styles.navBtn, { backgroundColor: topic.color }]}
+                onPress={() => setShowSharePopup(true)}
+              >
+                <Text style={[styles.navBtnText, { color: '#fff' }]}>Share 🎙️</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.navBtn}
+                onPress={handleNext}
+              >
+                <Text style={styles.navBtnText}>Next ▶</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </>
+      )}
+
+      {conversationStarted && char1 && char2 && (
+        <SharePopup
+          visible={showSharePopup}
+          topic={topic}
+          onClose={() => setShowSharePopup(false)}
+          podcastShareText={`🎙️ Just learned about ${topic.tag} with ${char1.name} & ${char2.name} on AI Vibe Check!\n\nToday's vibe: "${topic.vibe}" 🧠\n\nCheck it out → https://ai-vibe-check-mu.vercel.app\n#AIVibeCheck #LearnAI #TechVibes`}
+        />
       )}
     </View>
   );

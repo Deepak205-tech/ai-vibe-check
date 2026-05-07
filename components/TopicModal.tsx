@@ -16,6 +16,7 @@ import { Topic } from '../data/topics';
 import { Language } from '../data/podcastData';
 import { getDefaultCharIds } from '../data/onboardingData';
 import PodcastExplainer from './PodcastExplainer';
+import SharePopup from './SharePopup';
 
 const { height: SCREEN_H, width: SCREEN_W } = Dimensions.get('window');
 
@@ -33,8 +34,11 @@ export default function TopicModal({ topic, visible, onClose, defaultLang, defau
   const slideAnim = useRef(new Animated.Value(SCREEN_H)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
   const [activeTab, setActiveTab] = useState<Tab>('vibe');
+  const [currentQ, setCurrentQ] = useState(0);
+  const [correctFlags, setCorrectFlags] = useState([false, false, false]);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [showSharePopup, setShowSharePopup] = useState(false);
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const [podcastMounted, setPodcastMounted] = useState(false);
 
@@ -42,8 +46,11 @@ export default function TopicModal({ topic, visible, onClose, defaultLang, defau
     if (visible) {
       setPodcastMounted(false);
       setActiveTab('vibe');
+      setCurrentQ(0);
+      setCorrectFlags([false, false, false]);
       setSelectedAnswer(null);
       setShowResult(false);
+      setShowSharePopup(false);
       Animated.parallel([
         Animated.spring(slideAnim, {
           toValue: 0,
@@ -81,7 +88,15 @@ export default function TopicModal({ topic, visible, onClose, defaultLang, defau
     setSelectedAnswer(index);
     setShowResult(true);
 
-    if (index !== topic!.tryIt.correctIndex) {
+    const isCorrect = index === topic!.tryIt[currentQ].correctIndex;
+    if (isCorrect) {
+      const next = [...correctFlags];
+      next[currentQ] = true;
+      setCorrectFlags(next);
+      if (next.every(Boolean)) {
+        setTimeout(() => setShowSharePopup(true), 800);
+      }
+    } else {
       Animated.sequence([
         Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: USE_NATIVE }),
         Animated.timing(shakeAnim, { toValue: -10, duration: 60, useNativeDriver: USE_NATIVE }),
@@ -90,6 +105,17 @@ export default function TopicModal({ topic, visible, onClose, defaultLang, defau
         Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: USE_NATIVE }),
       ]).start();
     }
+  };
+
+  const handleNextQuestion = () => {
+    setSelectedAnswer(null);
+    setShowResult(false);
+    setCurrentQ(q => q + 1);
+  };
+
+  const handleRetry = () => {
+    setSelectedAnswer(null);
+    setShowResult(false);
   };
 
   if (!topic) return null;
@@ -183,14 +209,29 @@ export default function TopicModal({ topic, visible, onClose, defaultLang, defau
           {activeTab === 'tryit' && (
             <Animated.View style={{ transform: [{ translateX: shakeAnim }] }}>
               <View style={styles.quizCard}>
-                <Text style={styles.quizPrompt}>{topic.tryIt.prompt}</Text>
+                {/* Progress dots */}
+                <View style={styles.progressRow}>
+                  {[0, 1, 2].map(i => (
+                    <View
+                      key={i}
+                      style={[
+                        styles.progressDot,
+                        i === currentQ && styles.progressDotActive,
+                        correctFlags[i] && styles.progressDotCorrect,
+                      ]}
+                    />
+                  ))}
+                  <Text style={styles.progressLabel}>Question {currentQ + 1} of 3</Text>
+                </View>
 
-                {topic.tryIt.options.map((option, idx) => {
+                <Text style={styles.quizPrompt}>{topic.tryIt[currentQ].prompt}</Text>
+
+                {topic.tryIt[currentQ].options.map((option, idx) => {
                   let btnStyle = styles.quizOption;
                   let textStyle = styles.quizOptionText;
 
                   if (showResult) {
-                    if (idx === topic.tryIt.correctIndex) {
+                    if (idx === topic.tryIt[currentQ].correctIndex) {
                       btnStyle = { ...styles.quizOption, ...styles.correctOption };
                       textStyle = { ...styles.quizOptionText, color: '#fff' };
                     } else if (idx === selectedAnswer) {
@@ -209,9 +250,7 @@ export default function TopicModal({ topic, visible, onClose, defaultLang, defau
                       disabled={showResult}
                       activeOpacity={0.75}
                     >
-                      <Text style={styles.optionLetter}>
-                        {['A', 'B', 'C', 'D'][idx]}
-                      </Text>
+                      <Text style={styles.optionLetter}>{['A', 'B', 'C', 'D'][idx]}</Text>
                       <Text style={textStyle}>{option}</Text>
                     </TouchableOpacity>
                   );
@@ -220,18 +259,28 @@ export default function TopicModal({ topic, visible, onClose, defaultLang, defau
                 {showResult && (
                   <Animated.View style={[
                     styles.resultCard,
-                    { backgroundColor: selectedAnswer === topic.tryIt.correctIndex ? '#10B981' + '22' : '#EF4444' + '22' }
+                    { backgroundColor: selectedAnswer === topic.tryIt[currentQ].correctIndex ? '#10B981' + '22' : '#EF4444' + '22' }
                   ]}>
                     <Text style={styles.resultEmoji}>
-                      {selectedAnswer === topic.tryIt.correctIndex ? '🔥 Slay!' : '💀 Not quite...'}
+                      {selectedAnswer === topic.tryIt[currentQ].correctIndex ? '🔥 Slay!' : '💀 Not quite...'}
                     </Text>
-                    <Text style={styles.resultText}>{topic.tryIt.explanation}</Text>
-                    <TouchableOpacity
-                      style={styles.retryBtn}
-                      onPress={() => { setSelectedAnswer(null); setShowResult(false); }}
-                    >
-                      <Text style={styles.retryText}>Try again 🔄</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.resultText}>{topic.tryIt[currentQ].explanation}</Text>
+
+                    {selectedAnswer === topic.tryIt[currentQ].correctIndex ? (
+                      currentQ < 2 ? (
+                        <TouchableOpacity style={styles.retryBtn} onPress={handleNextQuestion}>
+                          <Text style={styles.retryText}>Next Question →</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity style={[styles.retryBtn, { backgroundColor: topic.color + '33' }]} onPress={() => setShowSharePopup(true)}>
+                          <Text style={styles.retryText}>See your result 🏆</Text>
+                        </TouchableOpacity>
+                      )
+                    ) : (
+                      <TouchableOpacity style={styles.retryBtn} onPress={handleRetry}>
+                        <Text style={styles.retryText}>Try again 🔄</Text>
+                      </TouchableOpacity>
+                    )}
                   </Animated.View>
                 )}
               </View>
@@ -251,6 +300,14 @@ export default function TopicModal({ topic, visible, onClose, defaultLang, defau
           <View style={{ height: 40 }} />
         </ScrollView>
       </Animated.View>
+
+      {topic && (
+        <SharePopup
+          visible={showSharePopup}
+          topic={topic}
+          onClose={() => setShowSharePopup(false)}
+        />
+      )}
     </Modal>
   );
 }
@@ -376,6 +433,32 @@ const styles = StyleSheet.create({
   },
   quizCard: {
     gap: 10,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  progressDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  progressDotActive: {
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    width: 20,
+  },
+  progressDotCorrect: {
+    backgroundColor: '#10B981',
+    width: 8,
+  },
+  progressLabel: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 11,
+    fontWeight: '600',
+    marginLeft: 4,
   },
   quizPrompt: {
     color: '#FFFFFF',
