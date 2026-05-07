@@ -17,15 +17,15 @@ export interface ScriptLine {
 }
 
 export const CHARACTERS: Character[] = [
-  { id: 'rajini',   name: 'Rajinikanth',  emoji: '🕶️', color: '#FF6B6B', image: require('../assets/characters/rajini.png') },
-  { id: 'virat',    name: 'Virat Kohli',  emoji: '🏏',  color: '#10B981', image: require('../assets/characters/virat.png') },
-  { id: 'allu',     name: 'Allu Arjun',   emoji: '🕺',  color: '#F59E0B', image: require('../assets/characters/allu.png') },
-  { id: 'dhoni',    name: 'MS Dhoni',     emoji: '😎',  color: '#06B6D4', image: require('../assets/characters/dhoni.png') },
-  { id: 'samantha', name: 'Samantha',     emoji: '💃',  color: '#EC4899', image: require('../assets/characters/samantha.png') },
-  { id: 'deepika',  name: 'Deepika',      emoji: '🌸',  color: '#A855F7', image: require('../assets/characters/deepika.png') },
-  { id: 'kapil',    name: 'Kapil Sharma', emoji: '😂',  color: '#84CC16', image: require('../assets/characters/kapil.png') },
-  { id: 'sundar',   name: 'Sundar Pichai',emoji: '💻',  color: '#0EA5E9', image: require('../assets/characters/sundar.png') },
-  { id: 'yash',     name: 'Yash',         emoji: '🔥',  color: '#D97706', image: require('../assets/characters/yash.png') },
+  { id: 'rajini',   name: 'Rajinikanth',   emoji: '🕶️', color: '#FF6B6B' },
+  { id: 'virat',    name: 'Virat Kohli',   emoji: '🏏',  color: '#10B981' },
+  { id: 'allu',     name: 'Allu Arjun',    emoji: '🕺',  color: '#F59E0B' },
+  { id: 'dhoni',    name: 'MS Dhoni',      emoji: '😎',  color: '#06B6D4' },
+  { id: 'samantha', name: 'Samantha',      emoji: '💃',  color: '#EC4899' },
+  { id: 'deepika',  name: 'Deepika',       emoji: '🌸',  color: '#A855F7' },
+  { id: 'kapil',    name: 'Kapil Sharma',  emoji: '😂',  color: '#84CC16' },
+  { id: 'sundar',   name: 'Sundar Pichai', emoji: '💻',  color: '#0EA5E9' },
+  { id: 'yash',     name: 'Yash',          emoji: '🔥',  color: '#D97706' },
 ];
 
 export const SCRIPT_TEMPLATE: ScriptLine[] = [
