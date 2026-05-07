@@ -9,10 +9,12 @@ import OnboardingScreen from './components/OnboardingScreen';
 import { AI_TOPICS, Topic } from './data/topics';
 import { useAuth } from './hooks/useAuth';
 import { useProfile } from './hooks/useProfile';
+import { useReadTopics } from './hooks/useReadTopics';
 
 export default function App() {
   const { user, loading } = useAuth();
   const { profile, profileLoading, saveOnboarding } = useProfile(user?.id ?? null);
+  const { readIds, markRead, markUnread } = useReadTopics();
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -39,6 +41,9 @@ export default function App() {
         topics={AI_TOPICS}
         onTopicPress={handleTopicPress}
         modalOpen={modalVisible}
+        readIds={readIds}
+        onMarkRead={markRead}
+        onMarkUnread={markUnread}
       />
       <TopicModal
         topic={selectedTopic}

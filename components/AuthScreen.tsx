@@ -7,12 +7,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { signInWithGoogle, signInWithLinkedIn } from '../services/authService';
+import { signInWithGoogle } from '../services/authService';
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 export default function AuthScreen() {
-  const [loading, setLoading] = useState<'google' | 'linkedin' | null>(null);
+  const [loading, setLoading] = useState<'google' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleGoogle = async () => {
@@ -20,18 +20,6 @@ export default function AuthScreen() {
     setLoading('google');
     try {
       await signInWithGoogle();
-    } catch (e: any) {
-      setError(e.message ?? 'Sign in failed');
-    } finally {
-      setLoading(null);
-    }
-  };
-
-  const handleLinkedIn = async () => {
-    setError(null);
-    setLoading('linkedin');
-    try {
-      await signInWithLinkedIn();
     } catch (e: any) {
       setError(e.message ?? 'Sign in failed');
     } finally {
@@ -63,21 +51,6 @@ export default function AuthScreen() {
               : <>
                   <Text style={styles.googleIcon}>G</Text>
                   <Text style={styles.googleText}>Continue with Google</Text>
-                </>
-            }
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.btn, styles.linkedinBtn]}
-            onPress={handleLinkedIn}
-            disabled={loading !== null}
-            activeOpacity={0.85}
-          >
-            {loading === 'linkedin'
-              ? <ActivityIndicator color="#fff" />
-              : <>
-                  <Text style={styles.linkedinIcon}>in</Text>
-                  <Text style={styles.linkedinText}>Continue with LinkedIn</Text>
                 </>
             }
           </TouchableOpacity>
@@ -174,24 +147,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: '#333',
-  },
-  linkedinBtn: {
-    backgroundColor: '#0A66C2',
-  },
-  linkedinIcon: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: '#fff',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    borderRadius: 4,
-    width: 22,
-    textAlign: 'center',
-    paddingVertical: 1,
-  },
-  linkedinText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#fff',
   },
   error: {
     color: '#EF4444',
